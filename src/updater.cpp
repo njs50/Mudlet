@@ -96,12 +96,16 @@ Updater::Updater(QObject* parent, QSettings* settings, bool testVersion)
     feed = std::make_unique<dblsqd::Feed>();
     feed->setRepo(QStringLiteral("Mudlet"), QStringLiteral("Mudlet"), testVersion, QString(), arch);
 
-    if (!mDailyCheck) {
-        mDailyCheck = std::make_unique<QTimer>();
-    }
+    mDailyCheck = std::make_unique<QTimer>();
 }
 
-Updater::~Updater() = default;
+Updater::~Updater()
+{
+    // feed (unique_ptr member) is destroyed before QObject::~QObject() runs for
+    // Updater. Disconnect preemptively so no pending signal fires against a
+    // dangling feed pointer during Updater's remaining destruction.
+    disconnect(feed.get(), nullptr, nullptr, nullptr);
+}
 
 void Updater::checkUpdatesOnStart()
 {
@@ -203,7 +207,7 @@ void Updater::showFullChangelog() const
 {
     if (!feed->isReady()) {
         KDToolBox::connectSingleShot(feed.get(), &dblsqd::Feed::ready, feed.get(), [=, this]() {
-            showChangelog();
+            showFullChangelog();
         });
         KDToolBox::connectSingleShot(feed.get(), &dblsqd::Feed::loadError, feed.get(), [](const QString& error) {
             qWarning() << "Failed to load feed for changelog:" << error;
