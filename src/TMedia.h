@@ -130,6 +130,7 @@ public:
     int getMaxAllowedSoundPlayers() const;
     int getMaxAllowedMusicPlayers() const;
     int getMaxAllowedVideoPlayers() const;
+    void getMediaPlayerCounts(int& soundPlayers, int& musicPlayers, int& stoppedPlayers) const;
 
     void playMedia(TMediaData& mediaData);
     QList<TMediaData> playingMedia(TMediaData& mediaData);

@@ -5609,6 +5609,9 @@ void TLuaInterpreter::initLuaGlobals()
     lua_register(pGlobalLua, "timeStampsEnabled", TLuaInterpreter::timeStampsEnabled);
     lua_register(pGlobalLua, "setActiveProfile", TLuaInterpreter::setActiveProfile);
     lua_register(pGlobalLua, "getKeyCode", TLuaInterpreter::getKeyCode);
+    lua_register(pGlobalLua, "getProcessMemoryUsage", TLuaInterpreter::getProcessMemoryUsage);
+    lua_register(pGlobalLua, "getSubsystemMemoryStats", TLuaInterpreter::getSubsystemMemoryStats);
+
     // PLACEMARKER: End of main Lua interpreter functions registration
     // check new functions against https://www.linguistic-antipatterns.com when creating them
 
