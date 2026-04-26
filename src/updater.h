@@ -60,7 +60,7 @@ public:
 
 private:
     std::unique_ptr<dblsqd::Feed> feed;
-    dblsqd::UpdateDialog* updateDialog{nullptr};
+    std::unique_ptr<dblsqd::UpdateDialog> updateDialog;
 #if !defined(Q_OS_MACOS)
     QPushButton* mpInstallOrRestart;
 #endif

@@ -101,10 +101,7 @@ Updater::Updater(QObject* parent, QSettings* settings, bool testVersion)
     }
 }
 
-Updater::~Updater()
-{
-    delete updateDialog;
-}
+Updater::~Updater() = default;
 
 void Updater::checkUpdatesOnStart()
 {
@@ -309,7 +306,7 @@ void Updater::setupOnWindows()
     // Setup to run setup.exe to replace the old installation
     connect(feed.get(), &dblsqd::Feed::downloadFinished, this, [=, this]() {
         // if automatic updates are enabled, and this isn't a manual check, perform the automatic update
-        if (!(updateAutomatically() && updateDialog->isHidden())) {
+        if (!(updateAutomatically() && updateDialog && updateDialog->isHidden())) {
             return;
         }
 
@@ -332,11 +329,11 @@ void Updater::setupOnWindows()
     });
 
     // finally, create the dblsqd objects. Constructing the UpdateDialog triggers the update check
-    updateDialog = new dblsqd::UpdateDialog(feed.get(), updateAutomatically() ? dblsqd::UpdateDialog::OnLastWindowClosed : dblsqd::UpdateDialog::Manual, mSettings);
+    updateDialog = std::make_unique<dblsqd::UpdateDialog>(feed.get(), updateAutomatically() ? dblsqd::UpdateDialog::OnLastWindowClosed : dblsqd::UpdateDialog::Manual, mSettings);
     //: Label for the update button shown in the update dialog
     mpInstallOrRestart->setText(tr("Update"));
     updateDialog->addInstallButton(mpInstallOrRestart);
-    connect(updateDialog, &dblsqd::UpdateDialog::installButtonClicked, this, &Updater::slot_installOrRestartClicked);
+    connect(updateDialog.get(), &dblsqd::UpdateDialog::installButtonClicked, this, &Updater::slot_installOrRestartClicked);
 }
 
 void Updater::prepareSetupOnWindows(const QString& downloadedSetupName)
@@ -354,7 +351,7 @@ void Updater::setupOnLinux()
     // Setup to unzip and replace old binary when the download is done
     connect(feed.get(), &dblsqd::Feed::downloadFinished, this, [=, this]() {
         // if automatic updates are enabled, and this isn't a manual check, perform the automatic update
-        if (!(updateAutomatically() && updateDialog->isHidden())) {
+        if (!(updateAutomatically() && updateDialog && updateDialog->isHidden())) {
             return;
         }
 
@@ -377,11 +374,11 @@ void Updater::setupOnLinux()
     });
 
     // finally, create the dblsqd objects. Constructing the UpdateDialog triggers the update check
-    updateDialog = new dblsqd::UpdateDialog(feed.get(), updateAutomatically() ? dblsqd::UpdateDialog::OnLastWindowClosed : dblsqd::UpdateDialog::Manual, mSettings);
+    updateDialog = std::make_unique<dblsqd::UpdateDialog>(feed.get(), updateAutomatically() ? dblsqd::UpdateDialog::OnLastWindowClosed : dblsqd::UpdateDialog::Manual, mSettings);
     //: Label for the update button shown in the update dialog
     mpInstallOrRestart->setText(tr("Update"));
     updateDialog->addInstallButton(mpInstallOrRestart);
-    connect(updateDialog, &dblsqd::UpdateDialog::installButtonClicked, this, &Updater::slot_installOrRestartClicked);
+    connect(updateDialog.get(), &dblsqd::UpdateDialog::installButtonClicked, this, &Updater::slot_installOrRestartClicked);
 }
 
 void Updater::untarOnLinux(const QString& fileName)
