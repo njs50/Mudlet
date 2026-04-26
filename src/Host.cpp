@@ -1756,11 +1756,6 @@ void Host::incomingStreamProcessor(const QString& data, int line)
     mTimerUnit.doCleanup();
     mTriggerUnit.doCleanup();
     mKeyUnit.doCleanup();
-
-    // Run an incremental GC step after each line's trigger processing so that
-    // PCRE2 regex userdatas (whose backing memory is invisible to Lua's GC
-    // byte counter) are finalised regularly rather than accumulating in RSS.
-    lua_gc(mLuaInterpreter.getLuaGlobalState(), LUA_GCSTEP, 20);
 }
 
 // When Mudlet is running in online mode, deleted temp* objects are cleaned up in bulk
