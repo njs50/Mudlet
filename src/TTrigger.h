@@ -37,7 +37,9 @@
 #include <pcre2.h>
 
 #include <map>
+#include <memory>
 #include <string>
+#include <vector>
 
 class Host;
 class TLuaInterpreter;
@@ -148,7 +150,7 @@ public:
     QString mSoundFile;
     int mStayOpen = 0;
     bool mColorTrigger = false;
-    QList<TColorTable*> mColorPatternList;
+    std::vector<std::unique_ptr<TColorTable>> mColorPatternList;
     // The next four members refer to the details of the currently selected
     // color trigger pattern item - it is not obvious that they need to be
     // stored in the profile even though they are:
@@ -177,8 +179,8 @@ private:
     inline void updateMultistates(int regexNumber, std::list<std::string>& captureList, std::list<int>& posList, const NameGroupMatches* nameMatches = nullptr);
     inline void filter(std::string&, int&);
     void processExactMatch(const QString& line, int patternNumber, int posOffset);
-    void processRegexMatch(const char* haystackC, const QString& haystack, int patternNumber, int posOffset,
-                           const QSharedPointer<pcre2_code>& re, int haystackCLength, pcre2_match_data* match_data, int rc);
+    void processRegexMatch(
+            const char* haystackC, const QString& haystack, int patternNumber, int posOffset, const QSharedPointer<pcre2_code>& re, int haystackCLength, pcre2_match_data* match_data, int rc);
     void processBeginOfLine(const QString& needle, int patternNumber, int posOffset);
     void processSubstringMatch(const QString& haystack, const QString& needle, int regexNumber, int posOffset, int where);
     void processColorPattern(int patternNumber, std::list<std::string>& captureList, std::list<int>& posList);
@@ -200,7 +202,10 @@ private:
     bool mIsMultiline = false;
     int mConditionLineDelta = 0;
     QString mCommand;
-    std::map<TMatchState*, TMatchState*> mConditionMap;
+    // Key is the raw address of the owned TMatchState — stable once inserted and
+    // used for O(1) lookup during the deferred-removal pass in match(). The map
+    // is the sole owner; the raw pointer is never passed out as an observer.
+    std::map<TMatchState*, std::unique_ptr<TMatchState>> mConditionMap;
     std::list<std::list<std::string>> mMultiCaptureGroupList;
     std::list<std::list<int>> mMultiCaptureGroupPosList;
     TLuaInterpreter* mpLua;
@@ -232,7 +237,7 @@ inline QDebug& operator<<(QDebug& debug, const TTrigger* trigger)
     debug.nospace() << ", isMultiline=" << trigger->isMultiline();
     debug.nospace() << ", patterns=" << trigger->getPatternsList();
     debug.nospace() << ", regexCodes=" << trigger->getRegexCodePropertyList();
-    debug.nospace() << ", script is in: " << (trigger->mRegisteredAnonymousLuaFunction ? "string": "Lua function");
+    debug.nospace() << ", script is in: " << (trigger->mRegisteredAnonymousLuaFunction ? "string" : "Lua function");
     debug.nospace() << ", script=" << trigger->getScript();
     debug.nospace() << ')';
     return debug;
