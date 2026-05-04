@@ -834,7 +834,11 @@ void dlgConnectionProfiles::slot_addProfile()
 // enables the deletion button once the correct text (profile name) is entered
 void dlgConnectionProfiles::slot_deleteProfileCheck(const QString& text)
 {
-    const QString profile = listWidget_profiles->currentItem()->data(csmNameRole).toString();
+    auto* pItem = listWidget_profiles->currentItem();
+    if (!pItem) {
+        return;
+    }
+    const QString profile = pItem->data(csmNameRole).toString();
     if (profile != text) {
         delete_button->setEnabled(false);
     } else {
@@ -846,7 +850,11 @@ void dlgConnectionProfiles::slot_deleteProfileCheck(const QString& text)
 // actually performs the deletion once the correct text has been entered
 void dlgConnectionProfiles::slot_reallyDeleteProfile()
 {
-    const QString profile = listWidget_profiles->currentItem()->data(csmNameRole).toString();
+    auto* pItem = listWidget_profiles->currentItem();
+    if (!pItem) {
+        return;
+    }
+    const QString profile = pItem->data(csmNameRole).toString();
     reallyDeleteProfile(profile);
 }
 
@@ -1340,7 +1348,6 @@ void dlgConnectionProfiles::fillout_form()
     if (toselectRow != -1) {
         listWidget_profiles->setCurrentRow(toselectRow);
     }
-
 }
 
 void dlgConnectionProfiles::setProfileIcon() const
@@ -1460,7 +1467,11 @@ void dlgConnectionProfiles::generateCustomProfile(const QString& profileName) co
 void dlgConnectionProfiles::slot_profileContextMenu(QPoint pos)
 {
     const QPoint globalPos = listWidget_profiles->mapToGlobal(pos);
-    auto profileName = listWidget_profiles->currentItem()->data(csmNameRole).toString();
+    auto* pItem = listWidget_profiles->currentItem();
+    if (!pItem) {
+        return;
+    }
+    auto profileName = pItem->data(csmNameRole).toString();
 
     QMenu menu;
     if (hasCustomIcon(profileName)) {
@@ -1498,7 +1509,11 @@ void dlgConnectionProfiles::slot_profileContextMenu(QPoint pos)
 
 void dlgConnectionProfiles::slot_setCustomIcon()
 {
-    auto profileName = listWidget_profiles->currentItem()->data(csmNameRole).toString();
+    auto* pItem = listWidget_profiles->currentItem();
+    if (!pItem) {
+        return;
+    }
+    auto profileName = pItem->data(csmNameRole).toString();
 
     QSettings& settings = *mudlet::getQSettings();
     QString lastDir = settings.value("lastFileDialogLocation", QDir::homePath()).toString();
@@ -1517,11 +1532,15 @@ void dlgConnectionProfiles::slot_setCustomIcon()
     }
 
     auto icon = QIcon(QPixmap(imageLocation).scaled(QSize(120, 30), Qt::IgnoreAspectRatio, Qt::SmoothTransformation).copy());
-    listWidget_profiles->currentItem()->setIcon(icon);
+    pItem->setIcon(icon);
 }
 void dlgConnectionProfiles::slot_setCustomColor()
 {
-    auto profileName = listWidget_profiles->currentItem()->data(csmNameRole).toString();
+    auto* pItem = listWidget_profiles->currentItem();
+    if (!pItem) {
+        return;
+    }
+    auto profileName = pItem->data(csmNameRole).toString();
     QColor color = QColorDialog::getColor(getCustomColor(profileName).value_or(QColor(255, 255, 255)));
     if (color.isValid()) {
         auto profileColorPath = mudlet::getMudletPath(enums::profileDataItemPath, profileName, qsl("profilecolor"));
@@ -1535,12 +1554,16 @@ void dlgConnectionProfiles::slot_setCustomColor()
         if (!file.commit()) {
             qDebug() << "dlgConnectionProfiles::slot_setCustomColor: error saving custom icon color: " << file.errorString();
         }
-        listWidget_profiles->currentItem()->setIcon(customIcon(profileName, {color}));
+        pItem->setIcon(customIcon(profileName, {color}));
     }
 }
 void dlgConnectionProfiles::slot_resetCustomIcon()
 {
-    auto profileName = listWidget_profiles->currentItem()->data(csmNameRole).toString();
+    auto* pItem = listWidget_profiles->currentItem();
+    if (!pItem) {
+        return;
+    }
+    auto profileName = pItem->data(csmNameRole).toString();
 
     const bool success = mudlet::self()->resetProfileIcon(profileName).first;
     if (!success) {
