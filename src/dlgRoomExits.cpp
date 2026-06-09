@@ -103,10 +103,10 @@ QWidget* RoomIdLineEditDelegate::createEditor(QWidget* parent, const QStyleOptio
     }
     mpEditor = new QLineEdit(parent);
     mpEditor->setFrame(false);
-    mpEditor->setPlaceholderText(mpDlgRoomExits->mSpecialExitRoomIdPlaceholder);
     // Hide anything in the original QLineEdit that this sits on top of:
     mpEditor->setAutoFillBackground(true);
     if (mpDlgRoomExits) {
+        mpEditor->setPlaceholderText(mpDlgRoomExits->mSpecialExitRoomIdPlaceholder);
         if (!mpHost) {
             mpHost = mpDlgRoomExits->getHost();
         }
@@ -1005,10 +1005,6 @@ void dlgRoomExits::setIconAndToolTipsOnSpecialExit(QTreeWidgetItem* pSpecialExit
         // This is the toolTip text for the roomID number column (and the
         // status icons)
         const QString roomIdToolTipText{generateToolTip(pExitToRoom->name, exitAreaName, exitRoomLocked, outOfAreaExit, pExitToRoom->getWeight())};
-        pSpecialExit->setToolTip(ExitsTreeWidget::colIndex_exitStatus,
-                                 utils::richText(tr("The roomID of the room that this special exit leads to is expected here. "
-                                                    "If left like this, this exit will be deleted when <tt>save</tt> is clicked.")));
-
         pSpecialExit->setIcon(ExitsTreeWidget::colIndex_exitStatus, !showIconOnExitStatus ? QIcon() : exitRoomLocked ? mIcon_exitRoomLocked : outOfAreaExit ? mIcon_otherAreaExit : mIcon_inAreaExit);
         pSpecialExit->setToolTip(ExitsTreeWidget::colIndex_exitRoomId, roomIdToolTipText);
         pSpecialExit->setToolTip(ExitsTreeWidget::colIndex_exitStatus, roomIdToolTipText);
@@ -1416,7 +1412,7 @@ void dlgRoomExits::slot_out_textEdited(const QString& text)
 void dlgRoomExits::slot_stub_nw_stateChanged(int state)
 {
     normalStubExitChanged(
-            state, nw, noroute_nw, weight_nw, doortype_none_nw, doortype_open_nw, doortype_closed_nw, doortype_locked_n, utils::richText(tr("Set the number of the room northwest of this one.")));
+            state, nw, noroute_nw, weight_nw, doortype_none_nw, doortype_open_nw, doortype_closed_nw, doortype_locked_nw, utils::richText(tr("Set the number of the room northwest of this one.")));
     slot_checkModified();
 }
 
@@ -1878,6 +1874,7 @@ void dlgRoomExits::init()
                 break;
             default:
                 qWarning().nospace().noquote() << "dlgRoomExits::init() WARNING - in room: " << mRoomID << "unexpected (special exit) doors[" << dir << "] value:" << pR->doors[dir] << " found!";
+                break;
             }
             pSpecialExit->door = specialDoor;
             // Not relevant for special exits but initialise before moving into map

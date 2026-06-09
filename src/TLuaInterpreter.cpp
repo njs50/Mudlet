@@ -5026,6 +5026,14 @@ void TLuaInterpreter::initLuaGlobals()
     pGlobalLua = newstate();
     storeHostInLua(pGlobalLua, mpHost);
 
+    // Tune GC to collect sooner and work harder per step. The default pause of
+    // 200 (wait until heap doubles) is too lenient for PCRE2 regex userdatas
+    // whose backing memory is invisible to Lua's byte counter. Halving the
+    // pause and doubling the step multiplier reduces the window in which
+    // orphaned regex objects accumulate undetected by the GC.
+    lua_gc(pGlobalLua, LUA_GCSETPAUSE, 100);
+    lua_gc(pGlobalLua, LUA_GCSETSTEPMUL, 400);
+
     luaL_openlibs(pGlobalLua);
 
     lua_pushstring(pGlobalLua, "SESSION");
